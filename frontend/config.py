@@ -1,4 +1,4 @@
-API_BASE_URL = "http://localhost:8000" 
+API_BASE_URL = "https://weather-app-pk45.onrender.com" 
 
 CURRENT_WEATHER_PATH = "/weather/current"
 FORECAST_PATH = "/weather/forecast"
