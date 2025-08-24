@@ -8,7 +8,6 @@ from config import (
     USER_LOCATION_URL
 )
 
-
 def get_current_weather(city, units="metric"):
     url = f"{API_BASE_URL}{CURRENT_WEATHER_PATH}"
     r = requests.get(url, params={"city": city, "units": units})
@@ -67,3 +66,13 @@ def update_history(record_id, city=None, unit=None):
     r = requests.put(url, json=payload)
     r.raise_for_status()
     return r.json()
+
+def get_ai_summary(city, weather, forecast):
+    payload = {
+        "city": city,
+        "weather": weather,
+        "forecast": forecast,
+    }
+    r = requests.post(f"{API_BASE_URL}/weather/summary", json=payload)
+    r.raise_for_status()
+    return r.json().get("summary")

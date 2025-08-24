@@ -5,4 +5,4 @@ fastapi
 pydantic
 python-dotenv
 uvicorn
-
+google-generativeai

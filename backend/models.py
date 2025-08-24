@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Any
 
 class WeatherRecordBase(BaseModel):
     city: str = Field(..., example="London")
@@ -25,3 +25,7 @@ class WeatherRecordInDB(WeatherRecordBase):
     class Config:
         orm_mode = True  # Allows ORM objects to be returned directly
 
+class WeatherSummaryRequest(BaseModel):
+    city: str
+    weather: dict[str, Any]
+    forecast: dict[str, Any]

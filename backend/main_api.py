@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Body
-from backend import weather_api, db_service, models
+from backend import weather_api, db_service, models, utils
 import json
 from datetime import date
 app = FastAPI(title="Weather API")
@@ -76,14 +76,8 @@ def refresh_weather_record(record_id: int, payload: dict = Body(default={})):
         raise HTTPException(status_code=500, detail="Failed to update record")
     return db_service.get_record_by_id(record_id)
 
-'''import logging
-logging.basicConfig(level=logging.INFO)
+@app.post("/weather/summary")
+def weather_summary(req: models.WeatherSummaryRequest):
+    return {"summary": utils.summarize_weather(req.city, req.weather, req.forecast)}
 
-@app.middleware("http")
-async def log_requests(request, call_next):
-    logging.info(f"{request.method} {request.url}")
-    if request.method in ("POST", "PUT", "PATCH"):
-        body = await request.body()
-        logging.info(f"Request body: {body.decode()}")
-    response = await call_next(request)
-    return response'''
+

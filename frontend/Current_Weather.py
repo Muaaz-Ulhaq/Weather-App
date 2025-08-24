@@ -1,10 +1,11 @@
 import json
 from datetime import datetime, date, timedelta
 from typing import Dict, List, Optional, Tuple
+from pathlib import Path
 
 import plotly.express as px
 import streamlit as st
-from api_client import create_history, get_current_weather, get_forecast, get_user_city
+from api_client import create_history, get_current_weather, get_forecast, get_user_city, get_ai_summary
 from config import (
     PAGE_TITLE,
     PAGE_ICON,
@@ -224,10 +225,9 @@ def render_current_weather() -> None:
 def render_forecast_section() -> None:
     forecast_data = st.session_state.forecast
     daily_avg = process_forecast(forecast_data)
-    #if not daily_avg and not st.session_state.range_daily:
-        #st.info("No forecast data available.")
-        #return
-
+    if not daily_avg:
+        st.info("No forecast data available.")
+        return  # 🚨 prevents crash
     temp_symbol, _ = get_unit_symbols()
     st.subheader("📅 5-Day Forecast")
     cols = st.columns(len(daily_avg))
@@ -242,6 +242,19 @@ def render_forecast_section() -> None:
         labels={"avg_temp": f"Average Temp ({temp_symbol})", "date": "Date"}
     )
     st.plotly_chart(fig, use_container_width=True)
+
+    st.subheader("AI Weather Summary and Recommendations")
+    weather = st.session_state.weather
+    city = st.session_state.last_city
+
+    if st.button("Generate AI Summary"):
+        try:
+            with st.spinner("AI is analyzing the weather..."):
+                summary = get_ai_summary(city, weather, forecast_data)
+                #st.success("AI Summary:")
+                st.write(summary)
+        except Exception as e:
+            st.error(f"AI summary failed: {e}")
 
 def render_range_section() -> None:
     daily = st.session_state.range_daily
@@ -344,33 +357,9 @@ def main() -> None:
 if __name__ == "__main__":
     st.markdown("Weather App — by Muhammd Muaaz Ulhaq, mmuaazulhaq@gmail.com")
     with st.expander("ℹ️ About PM Accelerator"):
-        st.markdown("""
-    **Overview**  
-    The Product Manager Accelerator Program is designed to support PM professionals through every stage of their careers. From students looking for entry-level jobs to Directors looking to take on a leadership role, our program has helped over hundreds of students fulfill their career aspirations.
-
-    Our Product Manager Accelerator community are ambitious and committed. Through our program they have learnt, honed and developed new PM and leadership skills, giving them a strong foundation for their future endeavors.
-
-    **Here are the examples of services we offer:**  
-     **PMA Pro** – End-to-end product manager job hunting program that helps you master FAANG-level Product Management skills, conduct unlimited mock interviews, and gain job referrals through our largest alumni network. 25% of our offers came from tier 1 companies and get paid as high as $800K/year.  
-
-     **AI PM Bootcamp** – Gain hands-on AI Product Management skills by building a real-life AI product with a team of AI Engineers, data scientists, and designers. We will also help you launch your product with real user engagement using our 100,000+ PM community and social media channels.  
-
-     **PMA Power Skills** – Designed for existing product managers to sharpen their product management skills, leadership skills, and executive presentation skills.  
-
-     **PMA Leader** – We help you accelerate your product management career, get promoted to Director and product executive levels, and win in the board room.  
-
-     **1:1 Resume Review** – We help you rewrite your killer product manager resume to stand out from the crowd, with an interview guarantee. Get started by using our FREE killer PM resume template used by over 14,000 product managers. [Resume Template](https://www.drnancyli.com/pmresume)  
-
-     We also published over 500+ free training and courses. Please go to my [YouTube channel](https://www.youtube.com/c/drnancyli) and Instagram **@drnancyli** to start learning for free today.
-
-    **Website:** [pmaccelerator.io](https://www.pmaccelerator.io/)  
-    **Phone:** +1 954-889-1063  
-    **Industry:** E-Learning Providers  
-    **Company size:** 2-10 employees  
-    **Headquarters:** Boston, MA  
-    **Founded:** 2020  
-
-    **Specialties:** Product Management, Product Manager, Product Management Training, Product Management Certification, Product Lead, Product Executive, Associate Product Manager, Product Management Coaching, Product Manager Resume, Product Management Interview, VP of Product, Director of Product, Chief Product Officer, and AI Product Management.
-    """)
+        script_dir = Path(__file__).parent     
+        file_path  = script_dir / "resources" / "about_pma.txt" 
+        about_text = file_path.read_text(encoding="utf-8")
+        st.markdown(about_text)
 
     main()
